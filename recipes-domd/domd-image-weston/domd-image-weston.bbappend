@@ -2,16 +2,18 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/../../inc:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/../../recipes-domx:"
 
+XT_PRODUCT_NAME ?= "prod-devel"
+
 python __anonymous () {
     product_name = d.getVar('XT_PRODUCT_NAME', True)
     folder_name = product_name.replace("-", "_")
     d.setVar('XT_MANIFEST_FOLDER', folder_name)
-    if product_name == "prod-devel-src" and not "domu" in d.getVar('XT_GUESTS_BUILD', True).split():
+    if product_name == "prod-devel-src":
         d.appendVar("XT_QUIRK_BB_ADD_LAYER", "meta-aos")
 }
 
 SRC_URI = " \
-    repo://github.com/iusyk/manifests;protocol=https;branch=agl-cluster-prod-devel;manifest=${XT_MANIFEST_FOLDER}/domd.xml;scmdata=keep \
+    repo://github.com/xen-troops/manifests;protocol=https;branch=master;manifest=${XT_MANIFEST_FOLDER}/domd.xml;scmdata=keep \
 "
 
 XT_QUIRK_UNPACK_SRC_URI += " \
@@ -42,12 +44,6 @@ configure_versions_kingfisher() {
     base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " opencv-sdk"
     # Do not enable surroundview which cannot be used
     base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " surroundview"
-    base_update_conf_value ${local_conf} PACKAGECONFIG_remove_pn-libcxx "unwind"
-
-    # Remove the following if we use prebuilt EVA proprietary "graphics" packages
-    if [ ! -z ${XT_RCAR_EVAPROPRIETARY_DIR} ];then
-        base_update_conf_value ${local_conf} PACKAGECONFIG_remove_pn-cairo " egl glesv2"
-    fi
 }
 
 python do_configure_append_h3ulcb-4x2g-kf() {
@@ -55,6 +51,10 @@ python do_configure_append_h3ulcb-4x2g-kf() {
 }
 
 XT_BB_IMAGE_TARGET = "core-image-weston"
+
+# Path to proprietary graphic modules pre built binaries.
+# Uncomment line below and set proper path.
+#XT_RCAR_EVAPROPRIETARY_DIR = ""
 
 # Dom0 is a generic ARMv8 machine w/o machine overrides,
 # but still needs to know which system we are building,
@@ -76,29 +76,23 @@ python do_domd_install_machine_overrides() {
 XT_QUIRK_PATCH_SRC_URI_rcar = "\
     file://${S}/meta-renesas/meta-rcar-gen3/docs/sample/patch/patch-for-linaro-gcc/0001-rcar-gen3-add-readme-for-building-with-Linaro-Gcc.patch;patchdir=meta-renesas \
     file://0001-rcar-gen3-arm-trusted-firmware-Allow-to-add-more-bui.patch;patchdir=meta-renesas \
-    file://0001-copyscript-Set-GFX-Library-List-to-empty-string.patch;patchdir=meta-renesas \
-    file://0001-Add-vspfilter-configs.patch;patchdir=meta-renesas \
-    file://0001-recipes-kernel-Load-multimedia-related-modules-autom.patch;patchdir=meta-renesas \
-    file://0001-Modify-gstvspfilter-salvator-x_r8a7795.conf-to-use-v.patch;patchdir=meta-renesas \
-"
-
-XT_QUIRK_PATCH_SRC_URI_append_h3ulcb-4x2g-kf = "\
-    file://0001-linux-renesas-Remove-patch-230-from-renesas.scc.patch;patchdir=meta-rcar \
+    file://0001-Force-RCAR_LOSSY_ENABLE-to-0-until-Xen-is-fixed-to-p.patch;patchdir=meta-renesas \
 "
 
 XT_BB_LOCAL_CONF_FILE_rcar = "meta-xt-prod-extra/doc/local.conf.rcar-domd-image-weston"
 XT_BB_LAYERS_FILE_rcar = "meta-xt-prod-extra/doc/bblayers.conf.rcar-domd-image-weston"
 
-GLES_VERSION_rcar = "1.11"
+# Path to proprietary graphic modules pre built binaries.
+# Uncomment line below and set proper path.
+#XT_RCAR_EVAPROPRIETARY_DIR = ""
 
-# In order to copy proprietary "graphics" packages,
-# XT_RCAR_EVAPROPRIETARY_DIR variable under [local_conf] section in
-# the configuration file should point to the real packages location.
+GLES_VERSION_rcar = "1.10"
+
 configure_versions_rcar() {
     local local_conf="${S}/build/conf/local.conf"
 
     cd ${S}
-    base_update_conf_value ${local_conf} PREFERRED_VERSION_xen "4.14.0+git\%"
+    base_update_conf_value ${local_conf} PREFERRED_VERSION_xen "4.14+git\%"
     base_update_conf_value ${local_conf} PREFERRED_VERSION_u-boot_rcar "v2018.09\%"
     if [ -z ${XT_RCAR_EVAPROPRIETARY_DIR} ];then
         base_update_conf_value ${local_conf} PREFERRED_PROVIDER_gles-user-module "gles-user-module"
@@ -169,32 +163,10 @@ configure_versions_rcar() {
     if echo "${MACHINEOVERRIDES}" | grep -qiv "kingfisher"; then
         base_add_conf_value ${local_conf} DISTRO_FEATURES_remove "wifi bluetooth"
     fi
-
-    # we enable vsp2-renderer only for H3 ES3 based machines
-    if echo "${MACHINEOVERRIDES}" | grep -qiv "r8a7795-es3"; then
-        base_set_conf_value ${local_conf} DISTRO_FEATURES_remove "v4l2-renderer"
-    fi
-
-    base_update_conf_value ${local_conf} XT_RCAR_PROPRIETARY_MULTIMEDIA_DIR "${XT_RCAR_PROPRIETARY_MULTIMEDIA_DIR}"
-}
-
-# In order to copy proprietary "multimedia" packages,
-# XT_RCAR_PROPRIETARY_MULTIMEDIA_DIR variable under [local_conf] section in
-# the configuration file should point to the real packages location.
-copy_rcar_proprietary_multimedia() {
-    local local_conf="${S}/build/conf/local.conf"
-
-    if [ ! -z ${XT_RCAR_PROPRIETARY_MULTIMEDIA_DIR} ];then
-        # Populate meta-renesas with proprietary software packages
-        # (according to the https://elinux.org/R-Car/Boards/Yocto-Gen3)
-        cd ${S}/meta-renesas
-        sh meta-rcar-gen3/docs/sample/copyscript/copy_evaproprietary_softwares.sh -f ${XT_RCAR_PROPRIETARY_MULTIMEDIA_DIR}
-    fi
 }
 
 python do_configure_append_rcar() {
     bb.build.exec_func("configure_versions_rcar", d)
-    bb.build.exec_func("copy_rcar_proprietary_multimedia", d)
 }
 
 do_install_append () {
@@ -202,6 +174,6 @@ do_install_append () {
     find ${LAYERDIR}/doc -iname "u-boot-env*" -exec cp -f {} ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt \; || true
     find ${LAYERDIR}/doc -iname "mk_sdcard_image.sh" -exec cp -f {} ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt \; \
     -exec cp -f {} ${DEPLOY_DIR} \; || true
-    find ${DEPLOY_DIR}/${PN}/ipk/aarch64 -iname "aos-vis_git*" -exec cp -f {} ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt \; && \
-    find ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt -iname "aos-vis_git*" -exec ln -sfr {} ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt/aos-vis \; || true
+    find ${DEPLOY_DIR}/${PN}/ipk/aarch64 -iname "aos-vis_git*" -exec cp -f {} ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt \; || true
+    find ${DEPLOY_DIR}/${PN}/ipk/all -iname "ca-certificates_*" -exec cp -f {} ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt \; || true
 }

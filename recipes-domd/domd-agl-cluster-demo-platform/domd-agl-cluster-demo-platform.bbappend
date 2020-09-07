@@ -13,43 +13,15 @@ XT_QUIRK_UNPACK_SRC_URI += "\
 "
 
 SRC_URI_rcar_append = " \
-    repo://github.com/iusyk/manifests;protocol=https;branch=agl-cluster-prod-devel;manifest=prod_tu2019_demo/domd.xml;scmdata=keep \
+    repo://github.com/xen-troops/manifests;protocol=https;branch=master;manifest=prod_tu2019_demo/domd.xml;scmdata=keep \
 "
 
 # these layers will be added to bblayers.conf on do_configure
 XT_QUIRK_BB_ADD_LAYER += "meta-xt-prod-extra"
 XT_QUIRK_BB_ADD_LAYER += "meta-xt-agl-base"
-
-XT_QUIRK_BB_ADD_LAYER_append_h3ulcb-4x2g-kf = " \
-    bsp/meta-rcar/meta-rcar-gen3-adas \
-"
-
 # Override revision of AGL auxiliary layers
 # N.B. the revision to use must be aligned with Poky's version of AGL to be built with
 BRANCH = "thud"
-
-configure_versions_kingfisher() {
-    local local_conf="${S}/build/conf/local.conf"
-
-    cd ${S}
-    #FIXME: patch ADAS: do not use network setup as we provide our own
-    base_add_conf_value ${local_conf} BBMASK "meta-rcar-gen3-adas/recipes-core/systemd"
-    # Remove development tools from the image
-    base_add_conf_value ${local_conf} IMAGE_INSTALL_remove " strace eglibc-utils ldd rsync gdbserver dropbear opkg git subversion nano cmake vim"
-    base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " opencv-sdk"
-    # Do not enable surroundview which cannot be used
-    base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " surroundview"
-    base_update_conf_value ${local_conf} PACKAGECONFIG_remove_pn-libcxx "unwind"
-
-    # Remove the following if we use prebuilt EVA proprietary "graphics" packages
-    if [ ! -z ${XT_RCAR_EVAPROPRIETARY_DIR} ];then
-        base_update_conf_value ${local_conf} PACKAGECONFIG_remove_pn-cairo " egl glesv2"
-    fi
-}
-
-python do_configure_append_h3ulcb-4x2g-kf() {
-    bb.build.exec_func("configure_versions_kingfisher", d)
-}
 
 # Dom0 is a generic ARMv8 machine w/o machine overrides,
 # but still needs to know which system we are building,
@@ -67,24 +39,6 @@ python do_domd_install_machine_overrides() {
 ################################################################################
 # Renesas R-Car
 ################################################################################
-XT_QUIRK_PATCH_SRC_URI_rcar = "\
-    file://${S}/bsp/meta-renesas-rcar-gen3/meta-rcar-gen3/docs/sample/patch/patch-for-linaro-gcc/0001-rcar-gen3-add-readme-for-building-with-Linaro-Gcc.patch;patchdir=meta-renesas-rcar-gen3 \
-"
-#    file://0001-rcar-gen3-arm-trusted-firmware-Allow-to-add-more-bui.patch;patchdir=meta-renesas 
-#    file://0001-copyscript-Set-GFX-Library-List-to-empty-string.patch;patchdir=meta-renesas 
-#    file://0001-Add-vspfilter-configs.patch;patchdir=meta-renesas 
-#    file://0001-recipes-kernel-Load-multimedia-related-modules-autom.patch;patchdir=meta-renesas 
-#    file://0001-Modify-gstvspfilter-salvator-x_r8a7795.conf-to-use-v.patch;patchdir=meta-renesas 
-
-
-
-#XT_QUIRK_PATCH_SRC_URI_append_h3ulcb-4x2g-kf = "
-#    file://0001-linux-renesas-Remove-patch-230-from-renesas.scc.patch;patchdir=meta-rcar 
-#"
-
-#XT_BB_LOCAL_CONF_FILE_rcar = "meta-xt-prod-extra/doc/local.conf.rcar-domd-image-weston"
-#XT_BB_LAYERS_FILE_rcar = "meta-xt-prod-extra/doc/bblayers.conf.rcar-domd-image-weston"
-
 SRCREV_agl-repo = "halibut_8.0.6"
 SRCREV_img-proprietary = "ef1aa566d74a11c4d2ae9592474030a706b4cf39"
 
@@ -94,17 +48,10 @@ configure_versions_rcar() {
     local local_conf="${S}/build/conf/local.conf"
 
     cd ${S}
-    base_update_conf_value ${local_conf} PREFERRED_VERSION_xen "4.12.0+git\%"
+    base_update_conf_value ${local_conf} PREFERRED_VERSION_xen "4.14.0+git\%"
     base_update_conf_value ${local_conf} PREFERRED_VERSION_u-boot_rcar "v2018.09\%"
-    
     base_update_conf_value ${local_conf} PREFERRED_VERSION_linux-renesas "4.14.75+git\%"
     base_update_conf_value ${local_conf} PREFERRED_VERSION_linux-libc-headers "4.14.75+git\%"
-
-    #base_update_conf_value ${local_conf} PREFERRED_VERSION_xen "4.14.0+git\%"
-    #base_update_conf_value ${local_conf} PREFERRED_VERSION_u-boot_rcar "v2018.09\%"
-    
-    
-
     if [ -z ${XT_RCAR_EVAPROPRIETARY_DIR} ];then
         base_update_conf_value ${local_conf} PREFERRED_PROVIDER_gles-user-module "gles-user-module"
         base_update_conf_value ${local_conf} PREFERRED_VERSION_gles-user-module ${GLES_VERSION}

@@ -9,7 +9,7 @@
  * kind, whether express or implied.
  */
 
-#include "r8a7795-salvator-xs-4x2g.dts"
+#include "r8a7795-salvator-xs.dts"
 
 /*
  * The device tree compiler (DTC) is allocating the phandle from 1 to
@@ -48,11 +48,31 @@
 	/delete-node/thermal-zones;
 	/delete-node/pmu_a57;
 	/delete-node/pmu_a53;
+
+	/delete-node/reserved-memory;
+
+	/delete-node/mmngr;
+	/delete-node/mmngrbuf;
 };
 
 /delete-node/&adsp;
 
-&sdhi2 {
+&dmac0 {
+	/delete-property/iommus;
+};
+
+&dmac1 {
+	/delete-property/iommus;
+};
+
+&dmac2 {
+	/delete-property/iommus;
+};
+&audma0 {
+	/delete-property/iommus;
+};
+
+&audma1 {
 	/delete-property/iommus;
 };
 

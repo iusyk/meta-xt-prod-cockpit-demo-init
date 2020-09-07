@@ -3,6 +3,9 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 SRC_URI_append = " \
     file://ip_forward.conf \
 "
+SRC_URI_remove = " \
+    file://eth0.network \
+"
 
 PACKAGECONFIG_append = " networkd"
 PACKAGECONFIG_append = " iptc"

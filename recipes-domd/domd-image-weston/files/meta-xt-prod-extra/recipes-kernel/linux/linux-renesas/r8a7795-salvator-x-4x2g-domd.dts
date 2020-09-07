@@ -1,5 +1,5 @@
 /*
- * Device Tree Source for the Salvator-X board with R-Car H3 ES3.0
+ * Device Tree Source for the Salvator-X 2nd version board with R-Car H3 ES2.0
  * running XEN hypervisor
  *
  * Copyright (C) 2018 Renesas Electronics Corp.
@@ -48,21 +48,31 @@
 	/delete-node/thermal-zones;
 	/delete-node/pmu_a57;
 	/delete-node/pmu_a53;
+
+	/delete-node/reserved-memory;
+
+	/delete-node/mmngr;
+	/delete-node/mmngrbuf;
 };
 
 /delete-node/&adsp;
 
-&pciec0 {
-	/* Map all possible DDR as inbound ranges */
-	dma-ranges = <0x42000000 0 0x40000000 0 0x40000000 0 0x80000000>;
+&dmac0 {
+	/delete-property/iommus;
 };
 
-&pciec1 {
-	/* Map all possible DDR as inbound ranges */
-	dma-ranges = <0x42000000 0 0x40000000 0 0x40000000 0 0x80000000>;
+&dmac1 {
+	/delete-property/iommus;
 };
 
-&sdhi2 {
+&dmac2 {
+	/delete-property/iommus;
+};
+&audma0 {
+	/delete-property/iommus;
+};
+
+&audma1 {
 	/delete-property/iommus;
 };
 

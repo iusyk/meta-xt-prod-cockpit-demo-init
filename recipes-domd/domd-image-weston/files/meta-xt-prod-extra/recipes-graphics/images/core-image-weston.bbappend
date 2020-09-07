@@ -9,14 +9,13 @@ IMAGE_INSTALL_append = " \
     kernel-modules \
     kmscube \
     optee-os \
-    ${@bb.utils.contains('XT_GUESTS_INSTALL', 'doma', 'displaymanager', '', d)} \
+    displaymanager \
+    guest-addons-display-manager-service \
 "
 
 python __anonymous () {
-    if (d.getVar("AOS_VIS_PACKAGE_DIR", True) or "") == "" and not "domu" in (d.getVar("XT_GUESTS_INSTALL", True).split()):
+    if (d.getVar("AOS_VIS_PACKAGE_DIR", True) or "") == "":
         d.appendVar("IMAGE_INSTALL", "aos-vis")
-    if (d.getVar("AOS_VIS_PACKAGE_DIR", True) or "") != "" and not "domu" in (d.getVar("XT_GUESTS_INSTALL", True).split()):
-        d.appendVar("IMAGE_INSTALL", "ca-certificates")
 }
 
 # Configuration for ARM Trusted Firmware
@@ -38,7 +37,7 @@ IMAGE_INSTALL_remove = " \
 IMAGE_INSTALL_remove = " \
     packagegroup-graphics-renesas-proprietary \
 "
-# sync tu2019
+
 IMAGE_INSTALL_append_kingfisher = " \
     iw \
 "
@@ -46,7 +45,7 @@ IMAGE_INSTALL_append_kingfisher = " \
 IMAGE_INSTALL_remove_kingfisher = " \
     wireless-tools \
 "
-# end
+
 CORE_IMAGE_BASE_INSTALL_remove += "gtk+3-demo clutter-1.0-examples"
 
 populate_vmlinux () {
@@ -56,11 +55,9 @@ populate_vmlinux () {
 IMAGE_POSTPROCESS_COMMAND += "populate_vmlinux; "
 
 install_aos () {
-    if echo "${XT_GUESTS_INSTALL}" | grep -qi "domu";then
-        exit 0
-    fi
     if [ ! -z "${AOS_VIS_PACKAGE_DIR}" ];then
-        opkg install ${AOS_VIS_PACKAGE_DIR}/aos-vis
+        opkg install ${AOS_VIS_PACKAGE_DIR}/ca-certificates_20170717-r0_all.ipk \
+                     ${AOS_VIS_PACKAGE_DIR}/aos-vis_git-r0_aarch64.ipk
     fi
 }
 
