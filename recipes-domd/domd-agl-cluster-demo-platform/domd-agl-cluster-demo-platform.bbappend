@@ -13,7 +13,7 @@ XT_QUIRK_UNPACK_SRC_URI += "\
 "
 
 SRC_URI_rcar_append = " \
-    repo://github.com/xen-troops/manifests;protocol=https;branch=master;manifest=prod_tu2019_demo/domd.xml;scmdata=keep \
+    repo://github.com/mvinnic/manifests;protocol=https;branch=prod_devel_agl-update_to_icefish;manifest=prod_devel_demo2020/domd.xml;scmdata=keep \
 "
 
 # these layers will be added to bblayers.conf on do_configure
@@ -39,7 +39,7 @@ python do_domd_install_machine_overrides() {
 ################################################################################
 # Renesas R-Car
 ################################################################################
-SRCREV_agl-repo = "halibut_8.0.6"
+SRCREV_agl-repo = "icefish_9.0.2"
 SRCREV_img-proprietary = "ef1aa566d74a11c4d2ae9592474030a706b4cf39"
 
 GLES_VERSION_rcar = "1.10"
