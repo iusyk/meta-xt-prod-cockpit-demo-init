@@ -45,8 +45,10 @@ do_install() {
     # Install pre-builded binaries
     install -d ${D}/${libdir}
     install -m 755 ${S}/${libdir}/*.so ${D}/${libdir}/
-    install -d ${D}/${exec_prefix}/local/bin
-    install -m 755 ${S}/${exec_prefix}/local/bin/dlcsrv_REL ${D}/${exec_prefix}/local/bin/dlcsrv_REL
+    #install -d ${D}/${exec_prefix}/local/bin
+    #install -d ${D}/${exec_prefix}/var/bin
+    #install -m 755 ${S}/${exec_prefix}/local/bin/dlcsrv_REL ${D}/${exec_prefix}/local/bin/dlcsrv_REL
+    #install -m 755 ${S}/${exec_prefix}/var/bin/dlcsrv_REL ${D}/${exec_prefix}/var/bin/dlcsrv_REL
     install -d ${D}/lib/firmware
     install -m 644 ${S}/lib/firmware/* ${D}/lib/firmware/
 
