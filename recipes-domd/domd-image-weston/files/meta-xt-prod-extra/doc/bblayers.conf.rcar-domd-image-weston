@@ -18,6 +18,8 @@ BBLAYERS ?= " \
   ${TOPDIR}/../meta-selinux \
   ${TOPDIR}/../meta-virtualization \
   ${TOPDIR}/../meta-clang \
+  ${TOPDIR}/../external/meta-qt5 \
+  ${TOPDIR}/../meta-agl/meta-app-framework \
   "
 BBLAYERS_NON_REMOVABLE ?= " \
   ${TOPDIR}/../poky/meta \

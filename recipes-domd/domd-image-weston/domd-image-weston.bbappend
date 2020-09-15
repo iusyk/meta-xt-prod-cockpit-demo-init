@@ -13,7 +13,7 @@ python __anonymous () {
 }
 
 SRC_URI = " \
-    repo://github.com/xen-troops/manifests;protocol=https;branch=master;manifest=${XT_MANIFEST_FOLDER}/domd.xml;scmdata=keep \
+    repo://github.com/iusyk/manifests;protocol=https;branch=agl-bin-doma;manifest=prod_devel/domd.xml;scmdata=keep \
 "
 
 XT_QUIRK_UNPACK_SRC_URI += " \
@@ -44,6 +44,10 @@ configure_versions_kingfisher() {
     base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " opencv-sdk"
     # Do not enable surroundview which cannot be used
     base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " surroundview"
+    
+    if [ ! -z ${XT_RCAR_EVAPROPRIETARY_DIR} ];then
+        base_update_conf_value ${local_conf} PACKAGECONFIG_remove_pn-cairo " egl glesv2"
+    fi
 }
 
 python do_configure_append_h3ulcb-4x2g-kf() {

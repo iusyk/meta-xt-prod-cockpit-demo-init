@@ -13,7 +13,7 @@ XT_QUIRK_UNPACK_SRC_URI += "\
 "
 
 SRC_URI_rcar_append = " \
-    repo://github.com/xen-troops/manifests;protocol=https;branch=master;manifest=prod_tu2019_demo/domd.xml;scmdata=keep \
+    repo://github.com/mvinnic/manifests;protocol=https;branch=prod_devel_agl-update_to_icefish;manifest=prod_devel_demo2020/domd.xml;scmdata=keep \
 "
 
 # these layers will be added to bblayers.conf on do_configure
@@ -39,7 +39,7 @@ python do_domd_install_machine_overrides() {
 ################################################################################
 # Renesas R-Car
 ################################################################################
-SRCREV_agl-repo = "halibut_8.0.6"
+SRCREV_agl-repo = "icefish_9.0.2"
 SRCREV_img-proprietary = "ef1aa566d74a11c4d2ae9592474030a706b4cf39"
 
 GLES_VERSION_rcar = "1.10"
@@ -117,6 +117,29 @@ configure_versions_rcar() {
 
 python do_configure_append_rcar() {
     bb.build.exec_func("configure_versions_rcar", d)
+}
+
+configure_versions_kingfisher() {
+    local local_conf="${S}/build/conf/local.conf"
+
+    cd ${S}
+    #FIXME: patch ADAS: do not use network setup as we provide our own
+    base_add_conf_value ${local_conf} BBMASK "meta-rcar-gen3-adas/recipes-core/systemd"
+    # Remove development tools from the image
+    base_add_conf_value ${local_conf} IMAGE_INSTALL_remove " strace eglibc-utils ldd rsync gdbserver dropbear opkg git subversion nano cmake vim"
+    base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " opencv-sdk"
+    # Do not enable surroundview which cannot be used
+    base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " surroundview"
+    base_update_conf_value ${local_conf} PACKAGECONFIG_remove_pn-libcxx "unwind"
+
+    # Remove the following if we use prebuilt EVA proprietary "graphics" packages
+    if [ ! -z ${XT_RCAR_EVAPROPRIETARY_DIR} ];then
+        base_update_conf_value ${local_conf} PACKAGECONFIG_remove_pn-cairo " egl glesv2"
+    fi
+}
+
+python do_configure_append_h3ulcb-4x2g-kf() {
+    bb.build.exec_func("configure_versions_kingfisher", d)
 }
 
 do_install_append () {
