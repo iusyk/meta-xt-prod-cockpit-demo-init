@@ -13,7 +13,7 @@ XT_QUIRK_UNPACK_SRC_URI += "\
 "
 
 SRC_URI_rcar_append = " \
-    repo://github.com/iusyk/manifests;protocol=https;branch=master;manifest=prod_tu2019_demo/domd.xml;scmdata=keep \
+    repo://github.com/mvinnic/manifests;protocol=https;branch=renesas_update_for_icefish_agl;manifest=prod_devel_demo2020/domd.xml;scmdata=keep \
 "
 
 # these layers will be added to bblayers.conf on do_configure
@@ -39,7 +39,7 @@ python do_domd_install_machine_overrides() {
 ################################################################################
 # Renesas R-Car
 ################################################################################
-SRCREV_agl-repo = "halibut_8.0.6"
+SRCREV_agl-repo = "icefish_9.0.2"
 SRCREV_img-proprietary = "ef1aa566d74a11c4d2ae9592474030a706b4cf39"
 
 GLES_VERSION_rcar = "1.10"
@@ -61,6 +61,7 @@ configure_versions_rcar() {
 
         base_update_conf_value ${local_conf} PREFERRED_VERSION_gles-module-egl-headers ${GLES_VERSION}
         base_add_conf_value ${local_conf} EXTRA_IMAGEDEPENDS "prepare-graphic-package"
+        base_add_conf_value ${local_conf} BBMASK "meta-agl/meta-agl-profile-graphical/recipes-multimedia/gstreamer1.0-plugins-bad/"
     else
         base_update_conf_value ${local_conf} PREFERRED_PROVIDER_virtual/libgles2 "rcar-proprietary-graphic"
         base_update_conf_value ${local_conf} PREFERRED_PROVIDER_virtual/egl "rcar-proprietary-graphic"
@@ -77,6 +78,7 @@ configure_versions_rcar() {
         base_add_conf_value ${local_conf} BBMASK "meta-xt-images-vgpu/recipes-kernel/kernel-module-gles/"
         base_add_conf_value ${local_conf} BBMASK "meta-renesas/meta-rcar-gen3/recipes-kernel/kernel-module-gles/"
         base_add_conf_value ${local_conf} BBMASK "meta-renesas/meta-rcar-gen3/recipes-graphics/gles-module/"
+        base_add_conf_value ${local_conf} BBMASK "meta-agl/meta-agl-profile-graphical/recipes-multimedia/gstreamer1.0-plugins-bad/"
         xt_unpack_proprietary
     fi
 
