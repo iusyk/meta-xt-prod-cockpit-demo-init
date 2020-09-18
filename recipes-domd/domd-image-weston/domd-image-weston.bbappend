@@ -13,7 +13,7 @@ python __anonymous () {
 }
 
 SRC_URI = " \
-    repo://github.com/iusyk/manifests;protocol=https;branch=agl-bin-doma;manifest=prod_devel/domd.xml;scmdata=keep \
+    repo://github.com/mvinnic/manifests;protocol=https;branch=renesas_update_for_icefish_agl;manifest=prod_devel_demo2020/domd.xml;scmdata=keep \
 "
 
 XT_QUIRK_UNPACK_SRC_URI += " \

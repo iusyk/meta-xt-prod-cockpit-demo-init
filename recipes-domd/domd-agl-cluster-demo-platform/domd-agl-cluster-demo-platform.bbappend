@@ -13,7 +13,7 @@ XT_QUIRK_UNPACK_SRC_URI += "\
 "
 
 SRC_URI_rcar_append = " \
-    repo://github.com/iusyk/manifests;protocol=https;branch=master;manifest=prod_tu2019_demo/domd.xml;scmdata=keep \
+ repo://github.com/mvinnic/manifests;protocol=https;branch=renesas_update_for_icefish_agl;manifest=prod_devel_demo2020/domd.xml;scmdata=keep \
 "
 
 # these layers will be added to bblayers.conf on do_configure
@@ -52,6 +52,7 @@ configure_versions_rcar() {
     base_update_conf_value ${local_conf} PREFERRED_VERSION_u-boot_rcar "v2018.09\%"
     base_update_conf_value ${local_conf} PREFERRED_VERSION_linux-renesas "4.14.75+git\%"
     base_update_conf_value ${local_conf} PREFERRED_VERSION_linux-libc-headers "4.14.75+git\%"
+    #base_update_conf_value ${local_conf} PREFERRED_VERSION_linux-yocto "4.14%"
     if [ -z ${XT_RCAR_EVAPROPRIETARY_DIR} ];then
         base_update_conf_value ${local_conf} PREFERRED_PROVIDER_gles-user-module "gles-user-module"
         base_update_conf_value ${local_conf} PREFERRED_VERSION_gles-user-module ${GLES_VERSION}
@@ -77,6 +78,9 @@ configure_versions_rcar() {
         base_add_conf_value ${local_conf} BBMASK "meta-xt-images-vgpu/recipes-kernel/kernel-module-gles/"
         base_add_conf_value ${local_conf} BBMASK "meta-renesas/meta-rcar-gen3/recipes-kernel/kernel-module-gles/"
         base_add_conf_value ${local_conf} BBMASK "meta-renesas/meta-rcar-gen3/recipes-graphics/gles-module/"
+        base_add_conf_value ${local_conf} BBMASK "meta-agl/meta-agl-profile-graphical/recipes-multimedia/gstreamer1.0-plugins-bad"
+        base_add_conf_value ${local_conf} BBMASK "meta-agl/meta-agl-bsp/meta-rcar-gen3-adas/recipes-kernel/linux/linux-renesas"
+        #base_add_conf_value ${local_conf} BBMASK "meta-renesas-rcar-gen3/meta-rcar-gen3/recipes-kernel/linux/linux-renesas"
         xt_unpack_proprietary
     fi
 
