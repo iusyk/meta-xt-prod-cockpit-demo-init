@@ -17,6 +17,7 @@ SRC_URI = " \
     file://android-disks.conf \
     file://bridge-up-notification.service \
     file://eth0.network \
+    file://display-manager.service \
     file://xenbr0.netdev \
     file://xenbr0.network \
     file://xenbr0-systemd-networkd.conf \
@@ -32,6 +33,7 @@ PACKAGES += " \
     ${PN}-bridge-config \
     ${PN}-android-disks-service \
     ${PN}-bridge-up-notification-service \
+    ${PN}-display-manager-service \
 "
 
 FILES_${PN}-bridge-config = " \
@@ -46,11 +48,14 @@ FILES_${PN}-bridge-config = " \
 SYSTEMD_PACKAGES = " \
     ${PN}-android-disks-service \
     ${PN}-bridge-up-notification-service \
+    ${PN}-display-manager-service \
 "
 
 SYSTEMD_SERVICE_${PN}-android-disks-service = "${@bb.utils.contains('XT_GUESTS_INSTALL', 'doma', 'android-disks.service', '', d)}"
 
 SYSTEMD_SERVICE_${PN}-bridge-up-notification-service = " bridge-up-notification.service"
+
+SYSTEMD_SERVICE_${PN}-display-manager-service = " display-manager.service"
 
 FILES_${PN}-android-disks-service = " \
     ${systemd_system_unitdir}/android-disks.service \
@@ -60,6 +65,10 @@ FILES_${PN}-android-disks-service = " \
 
 FILES_${PN}-bridge-up-notification-service = " \
     ${systemd_system_unitdir}/bridge-up-notification.service \
+"
+
+FILES_${PN}-display-manager-service = " \
+    ${systemd_system_unitdir}/display-manager.service \
 "
 RDEPENDS_${PN}-bridge-config = " \
     ethtool \
@@ -74,12 +83,6 @@ do_install() {
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/bridge-up-notification.service ${D}${systemd_system_unitdir}
 
-        #install display manager
-    install -m 0644 ${WORKDIR}/display-manager.service ${D}${systemd_system_unitdir}
-    
-    #install displ_be
-    install -m 0644 ${WORKDIR}/displbe.service ${D}${systemd_system_unitdir}
-
     install -d ${D}${sysconfdir}/systemd/network/
     install -m 0644 ${WORKDIR}/*.network ${D}${sysconfdir}/systemd/network
     install -m 0644 ${WORKDIR}/*.netdev ${D}${sysconfdir}/systemd/network
@@ -90,6 +93,9 @@ do_install() {
 
     install -d ${D}${sysconfdir}/systemd/system/systemd-networkd-wait-online.service.d
     install -m 0644 ${WORKDIR}/systemd-networkd-wait-online.conf ${D}${sysconfdir}/systemd/system/systemd-networkd-wait-online.service.d
+
+    install -d ${D}${systemd_system_unitdir}
+    install -m 0644 ${WORKDIR}/display-manager.service ${D}${systemd_system_unitdir}
 
     if ${@bb.utils.contains('XT_GUESTS_INSTALL', 'doma', 'true', 'false', d)}; then
         # Install android-disks artifacts
@@ -106,7 +112,5 @@ do_install() {
 
 FILES_${PN} = " \
     ${base_prefix}${XT_DIR_ABS_ROOTFS_SCRIPTS}/*.sh \
-    ${base_prefix}${XT_DIR_ABS_ROOTFS_CFG}/*.cfg \
 "
-# need to be clarified if it is necessary
 
