@@ -1,6 +1,6 @@
+
 SUMMARY = "config files and scripts for a guest"
 DESCRIPTION = "config files and scripts for guest which will be running for tests"
-
 require inc/xt_shared_env.inc
 
 PV = "0.1"
@@ -13,6 +13,7 @@ SRC_URI = " \
     file://doma_loop_detach.sh \
     file://doma_loop_setup.sh \
     file://android-disks.sh \
+    file://displbe.service \
     file://android-disks.service \
     file://android-disks.conf \
     file://bridge-up-notification.service \
@@ -23,6 +24,7 @@ SRC_URI = " \
     file://xenbr0-systemd-networkd.conf \
     file://port-forward-systemd-networkd.conf \
     file://systemd-networkd-wait-online.conf \
+    file://sndbe.service \
 "
 
 S = "${WORKDIR}"
@@ -32,6 +34,8 @@ inherit systemd
 PACKAGES += " \
     ${PN}-bridge-config \
     ${PN}-android-disks-service \
+    ${PN}-sndbe-service \
+    ${PN}-displbe-service \
     ${PN}-bridge-up-notification-service \
     ${PN}-display-manager-service \
 "
@@ -46,10 +50,15 @@ FILES_${PN}-bridge-config = " \
 "
 
 SYSTEMD_PACKAGES = " \
+    ${PN}-displbe-service \
+    ${PN}-sndbe-service \
     ${PN}-android-disks-service \
     ${PN}-bridge-up-notification-service \
     ${PN}-display-manager-service \
 "
+SYSTEMD_SERVICE_${PN}-displbe-service = " displbe.service"
+
+SYSTEMD_SERVICE_${PN}-sndbe-service = " sndbe.service"
 
 SYSTEMD_SERVICE_${PN}-android-disks-service = "${@bb.utils.contains('XT_GUESTS_INSTALL', 'doma', 'android-disks.service', '', d)}"
 
@@ -70,6 +79,14 @@ FILES_${PN}-bridge-up-notification-service = " \
 FILES_${PN}-display-manager-service = " \
     ${systemd_system_unitdir}/display-manager.service \
 "
+FILES_${PN}-displbe-service = " \
+    ${systemd_system_unitdir}/displbe.service \
+"
+
+FILES_${PN}-sndlbe-service = " \
+    ${systemd_system_unitdir}/sndbe.service \
+"
+
 RDEPENDS_${PN}-bridge-config = " \
     ethtool \
 "
@@ -80,8 +97,10 @@ do_install() {
     install -m 0744 ${WORKDIR}/bridge-nfsroot.sh ${D}${base_prefix}${XT_DIR_ABS_ROOTFS_SCRIPTS}
     install -m 0744 ${WORKDIR}/bridge.sh ${D}${base_prefix}${XT_DIR_ABS_ROOTFS_SCRIPTS}
 
+    #install -d ${D}${systemd_system_unitdir}
+    #install -m 0644 ${WORKDIR}/bridge-up-notification.service ${D}${systemd_system_unitdir}
     install -d ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/bridge-up-notification.service ${D}${systemd_system_unitdir}
+    install -m 0644 ${WORKDIR}/*.service ${D}${systemd_system_unitdir}
 
     install -d ${D}${sysconfdir}/systemd/network/
     install -m 0644 ${WORKDIR}/*.network ${D}${sysconfdir}/systemd/network
@@ -94,8 +113,8 @@ do_install() {
     install -d ${D}${sysconfdir}/systemd/system/systemd-networkd-wait-online.service.d
     install -m 0644 ${WORKDIR}/systemd-networkd-wait-online.conf ${D}${sysconfdir}/systemd/system/systemd-networkd-wait-online.service.d
 
-    install -d ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/display-manager.service ${D}${systemd_system_unitdir}
+    #install -d ${D}${systemd_system_unitdir}
+    #install -m 0644 ${WORKDIR}/display-manager.service ${D}${systemd_system_unitdir}
 
     if ${@bb.utils.contains('XT_GUESTS_INSTALL', 'doma', 'true', 'false', d)}; then
         # Install android-disks artifacts
@@ -112,5 +131,6 @@ do_install() {
 
 FILES_${PN} = " \
     ${base_prefix}${XT_DIR_ABS_ROOTFS_SCRIPTS}/*.sh \
+    ${base_prefix}${XT_DIR_ABS_ROOTFS_CFG}/*.cfg \
 "
 
