@@ -47,7 +47,7 @@ python do_domd_install_machine_overrides() {
 SRCREV_agl-repo = "icefish_9.0.2"
 SRCREV_img-proprietary = "ef1aa566d74a11c4d2ae9592474030a706b4cf39"
 
-GLES_VERSION_rcar = "1.10"
+GLES_VERSION_rcar = "1.11"
 
 configure_versions_rcar() {
     local local_conf="${S}/build/conf/local.conf"
