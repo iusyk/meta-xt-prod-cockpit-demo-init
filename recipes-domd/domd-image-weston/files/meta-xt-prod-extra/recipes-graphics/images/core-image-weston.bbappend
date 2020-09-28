@@ -9,8 +9,7 @@ IMAGE_INSTALL_append = " \
     kernel-modules \
     kmscube \
     optee-os \
-    displaymanager \
-    guest-addons-display-manager-service \
+    ${@bb.utils.contains('XT_GUESTS_INSTALL', 'doma', 'displaymanager', '', d)} \
 "
 
 python __anonymous () {
