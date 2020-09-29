@@ -1,5 +1,6 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/../../inc:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/../domd-image-weston/files:"
+FILESEXTRAPATHS_append := "${THISDIR}/files:"
 
 ###############################################################################
 # extra layers and files to be put after Yocto's do_unpack into inner builder
@@ -138,6 +139,7 @@ configure_versions_kingfisher() {
     # Do not enable surroundview which cannot be used
     base_add_conf_value ${local_conf} DISTRO_FEATURES_remove " surroundview"
     base_update_conf_value ${local_conf} PACKAGECONFIG_remove_pn-libcxx "unwind"
+    base_update_conf_value ${local_conf} DISTRO_FEATURES_append " pvcamera"
 
     # Remove the following if we use prebuilt EVA proprietary "graphics" packages
     if [ ! -z ${XT_RCAR_EVAPROPRIETARY_DIR} ];then
