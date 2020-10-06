@@ -1,2 +1,2 @@
-# meta-xt-prod-devel-agl
+# meta-xt-prod-cockpit-demo
 AGL integration into prod-devel
