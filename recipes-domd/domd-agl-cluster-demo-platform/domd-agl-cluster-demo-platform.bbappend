@@ -14,7 +14,7 @@ XT_QUIRK_UNPACK_SRC_URI += "\
 "
 
 SRC_URI_rcar_append = " \
-    repo://github.com/iusyk/manifests;protocol=https;branch=devel-agl;manifest=prod_devel_demo2020/domd.xml;scmdata=keep \
+    repo://github.com/xen-troops/manifests;protocol=https;branch=master;manifest=prod_cockpit_demo_src/domd.xml;scmdata=keep \
 "
 
 XT_QUIRK_PATCH_SRC_URI_append_h3ulcb-4x2g-kf = "\
@@ -152,7 +152,7 @@ python do_configure_append_h3ulcb-4x2g-kf() {
 }
 
 do_install_append () {
-    local LAYERDIR=${TOPDIR}/../meta-xt-prod-devel-agl
+    local LAYERDIR=${TOPDIR}/../meta-xt-prod-cockpit-demo
     find ${LAYERDIR}/doc -iname "u-boot-env*" -exec cp -f {} ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt \; || true
     if echo "${XT_GUESTS_INSTALL}" | grep -qi "domu";then
         find ${LAYERDIR}/doc -iname "mk_sdcard_image_domu.sh" -exec cp -f {} ${DEPLOY_DIR}/domd-image-weston/images/${MACHINE}-xt/mk_sdcard_image.sh \; \
